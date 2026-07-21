@@ -1,3 +1,4 @@
+
 import os
 import argparse
 import discord
@@ -44,6 +45,7 @@ class Homura(commands.Bot):
 
     async def setup_hook(self):
         await self.load_extension('commands.utility')
+        await self.load_extension('commands.fun')
 
         try:
             if getattr(args, 'debug', False):

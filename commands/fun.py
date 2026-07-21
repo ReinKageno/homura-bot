@@ -1,0 +1,15 @@
+
+import discord
+from services import gifs
+from discord.ext import commands
+
+class Fun(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.hybrid_command(name='look', description="Look at my...")
+    async def look(self, ctx:commands.Context):
+        await gifs.send_gif(ctx, member=None, action='look', msgt=False)
+
+async def setup(bot):
+    await bot.add_cog(Fun(bot))
