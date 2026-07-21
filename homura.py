@@ -10,12 +10,14 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-DUMMY_GUILD = discord.Object(os.getenv('DUMMY_GUILD_ID'))
 
 parser = argparse.ArgumentParser(description='Run TC Big Sister discord bot')
 parser.add_argument('--debug', action='store_true', help='Run in debug mode')
 args = parser.parse_args()
+
+BOT_TOKEN = os.getenv('BOT_TOKEN')
+if getattr(args, 'debug', False):
+    DUMMY_GUILD = discord.Object(os.getenv('DUMMY_GUILD_ID'))
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
