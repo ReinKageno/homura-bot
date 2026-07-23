@@ -12,7 +12,7 @@ class Fun(commands.Cog):
         await gifs.send_gif(ctx, None, 'look', False)
 
     @commands.hybrid_command(name='pat', description="Get a pat or give to someone")
-    async def look(self, ctx:commands.Context, member:discord.Member=None):
+    async def pat(self, ctx:commands.Context, member:discord.Member=None):
         await gifs.send_gif(ctx, member, 'pat')
 
 async def setup(bot):
