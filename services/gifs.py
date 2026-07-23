@@ -8,22 +8,32 @@ from discord.ext import commands
 DATA_PATH = 'data/'
 
 def get_gif(category):
+    import re
+
     with open(DATA_PATH + 'gifs.json', 'r') as file:
         gifs = json.load(file)
 
-    return random.choice(gifs[category])
+    url = random.choice(gifs[category])
 
-def get_message(category):
+    url = re.sub(r"media\d+", "media", url)
+    url = url.replace(".com/m/", ".com/")
+
+    return url
+
+def get_message(category, alone:bool):
+    category = category + '-self' if alone is True else category
+    
     with open(DATA_PATH + 'gifs_message.json', 'r') as file:
-        msgs = json.load(file)
+        text = json.load(file)
 
-    return random.choice(msgs[category])
+    return random.choice(text[category])
 
-async def send_gif(ctx, member, action, msgt=True):
+async def send_gif(ctx, member, action, target=True):
     try:
         gif = get_gif(action)
-        if msgt is True:
-            msg = get_message(action).format(
+        if target is True:
+            solo = True if member is None else False
+            msg = get_message(action, solo).format(
                 author = ctx.author.mention,
                 target = member.mention if member is not None else None,
             )

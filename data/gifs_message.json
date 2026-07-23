@@ -1,3 +1,15 @@
 {
-    "look": [""]
+    "pat": [
+        "{target} got pat from {author}.",
+        "{author} wants pat {target}, it happened!",
+        "{author} couldn't resist patting {target}.",
+        "{author} patted {target}."
+    ],
+
+    "pat-self": [
+        "{author} feels lonely and wants a head pat.",
+        "{author} patted {author}.",
+        "Someone from {author}'s world pats {author}.",
+        "{author} got patted."
+    ]
 }
