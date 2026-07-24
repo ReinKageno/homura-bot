@@ -28,17 +28,14 @@ def get_message(category, alone:bool):
 
     return random.choice(text[category])
 
-async def send_gif(ctx, member, action, target=True):
+async def send_gif(ctx, member, action):
     try:
         gif = get_gif(action)
-        if target is True:
-            solo = True if member is None else False
-            msg = get_message(action, solo).format(
-                author = ctx.author.mention,
-                target = member.mention if member is not None else None,
-            )
-        
-        else: msg = ""
+        solo = True if member is None else False
+        msg = get_message(action, solo).format(
+            author = ctx.author.mention,
+            target = member.mention if solo is False else None,
+        )
 
         embed = discord.Embed(
             description=f"{msg}"

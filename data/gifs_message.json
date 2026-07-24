@@ -1,7 +1,30 @@
 {
+    "cry-self": [
+        "{author} is crying...",
+        "{author} seems to be undergoing a life test.",
+        "The rain is too heavy, {author} can't hold the water.",
+        "{author} is not in a good mood."
+    ],
+
+    "hug": [
+        "{author} hugged {target}.",
+        "{target} got a hug from {author}.",
+        "{author} hug {target} tightly.",
+        "{author} hugged {target} wholeheartedly."
+    ],
+
+    "hug-self": [
+        "{author} got hugged.",
+        "{author} wants a hug. Their familiar hugged {author}.",
+        "{author} felt lonely and got hugged."
+    ],
+
+    "look": [""],
+    "look-self": [""],
+
     "pat": [
         "{target} got pat from {author}.",
-        "{author} wants pat {target}, it happened!",
+        "{author} wants pat {target}. It happened!",
         "{author} couldn't resist patting {target}.",
         "{author} patted {target}."
     ],
