@@ -2,19 +2,19 @@
     "cry-self": [
         "{author} is crying...",
         "{author} seems to be undergoing a life test.",
-        "The rain is too heavy, {author} can't hold the water.",
+        "The rain is too heavy, {author} can feel it.",
         "{author} is not in a good mood."
     ],
 
     "hug": [
-        "{author} hugged {target}.",
-        "{target} got a hug from {author}.",
-        "{author} hug {target} tightly.",
-        "{author} hugged {target} wholeheartedly."
+        "{author} hugs {target}.",
+        "{target} gets a hug from {author}.",
+        "{author} hugs {target} tightly.",
+        "{author} is hugging {target} wholeheartedly."
     ],
 
     "hug-self": [
-        "{author} got hugged.",
+        "{author} is hugged.",
         "{author} wants a hug. Their familiar hugged {author}.",
         "{author} felt lonely and got hugged."
     ],
@@ -23,16 +23,28 @@
     "look-self": [""],
 
     "pat": [
-        "{target} got pat from {author}.",
+        "{target} gets a pat from {author}.",
         "{author} wants pat {target}. It happened!",
         "{author} couldn't resist patting {target}.",
-        "{author} patted {target}."
+        "{author} pats {target}."
     ],
 
     "pat-self": [
         "{author} feels lonely and wants a head pat.",
-        "{author} patted {author}.",
+        "{author} pats {author}.",
         "Someone from {author}'s world pats {author}.",
-        "{author} got patted."
+        "{author} gets a pat."
+    ],
+
+    "slap": [
+        "{author} slaps {target}.",
+        "{author} couldn't resist slapping {target}.",
+        "{target} annoys {author} and gets slapped."
+    ],
+
+    "slap-self": [
+        "{author} gets a slap.",
+        "{author} gets a slap from their familiar.",
+        "A slap sent from mom to {author}."
     ]
 }
