@@ -1,7 +1,6 @@
 
 import json
 import random
-import traceback
 import discord
 from discord.ext import commands
 
@@ -15,6 +14,7 @@ def get_gif(category):
 
     url = random.choice(gifs[category])
 
+    # tenor link resolver
     url = re.sub(r"media\d+", "media", url)
     url = url.replace(".com/m/", ".com/")
 
@@ -28,15 +28,18 @@ def get_message(category, alone:bool):
 
     return random.choice(text[category])
 
-async def send_gif(ctx, member, action):
-    try:
-        gif = get_gif(action)
-        solo = True if member is None else False
-        msg = get_message(action, solo).format(
-            author = ctx.author.mention,
-            target = member.mention if solo is False else None,
-        )
+async def send_gif(ctx:commands.Context, member, action):
+    _author = ctx.author.mention
+    _mention = member.mention if member else None
+    solo = True if member else False
 
+    gif = get_gif(action)
+    msg = get_message(action, solo).format(
+        author = _author,
+        target = _mention
+    )
+
+    if gif and msg:
         embed = discord.Embed(
             description=f"{msg}"
         )
@@ -44,12 +47,12 @@ async def send_gif(ctx, member, action):
         embed.set_image(url=gif)
 
         await ctx.send(embed=embed)
+        print(f"A gif has been sent to {ctx.message.id}")
 
-    except:
+    else:
         msg_id = ctx.message.id
         print(f'Error at {msg_id}')
-        traceback.print_exc()
         await ctx.send(
             f"An error occured, please contact the developer\n"
-            f"-# {msg_id}"
-            )
+            f"-# id {msg_id}"
+        )

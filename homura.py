@@ -4,8 +4,7 @@ import argparse
 import discord
 import logging
 import logging.handlers
-import pyauxy
-import traceback
+import pyauxy.pcolors as pclr
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -23,7 +22,7 @@ logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 
 if hasattr(logging, 'HTTP'):
-    logging.getLogger('discord.http').setLevel(logging.WARNING)
+    logging.getLogger('discord.http').setLevel(logging.INFO)
 
 handler = logging.handlers.RotatingFileHandler(
      filename='discord.log',
@@ -46,22 +45,18 @@ class Homura(commands.Bot):
         await self.load_extension('commands.utility')
         await self.load_extension('commands.fun')
 
-        try:
-            if getattr(args, 'debug', False):
-                print(f'{pyauxy.strc("Syncing with guid ", "yellow")}{DUMMY_GUILD.id}')
-                self.tree.copy_global_to(guild=DUMMY_GUILD)
-                await self.tree.sync(guild=DUMMY_GUILD)
-            else:
-                print('Syncing to global discord APIs')
-                self.tree.clear_commands(guild=DUMMY_GUILD)
-                await self.tree.sync()
-            
-        except:
-            traceback.print_exc()
+        if getattr(args, 'debug', False):
+            print(f'{pclr.strc("Syncing with guid ", "yellow")}{DUMMY_GUILD.id}')
+            self.tree.copy_global_to(guild=DUMMY_GUILD)
+            await self.tree.sync(guild=DUMMY_GUILD)
+        else:
+            print('Syncing to global discord APIs')
+            self.tree.clear_commands(guild=DUMMY_GUILD)
+            await self.tree.sync()
 
     async def on_ready(self):
         if getattr(args, 'debug', False):
-            pyauxy.printc('Bot is running in DEBUG mode.', 'yellow')
+            pclr.printc('Bot is running in DEBUG mode.', 'yellow')
 
         print(f'Logged in as {self.user}')
 

@@ -1,3 +1,4 @@
+
 def printc(message, color='default'):
     match color:
         case 'default':
