@@ -5,11 +5,11 @@ import discord
 import logging
 import logging.handlers
 import pyauxy.pcolors as pclr
+from config import config
 from discord.ext import commands
 from dotenv import load_dotenv
 
 load_dotenv()
-
 
 parser = argparse.ArgumentParser(description='Run TC Big Sister discord bot')
 parser.add_argument('--debug', action='store_true', help='Run in debug mode')
@@ -39,7 +39,8 @@ logger.addHandler(handler)
 class Homura(commands.Bot):
     def __init__(self):
         intents = discord.Intents.all()
-        super().__init__(command_prefix='!', intents=intents)
+        super().__init__(command_prefix=config.PREFIX, intents=intents)
+        self.remove_command('help')
 
     async def setup_hook(self):
         await self.load_extension('commands.utility')
