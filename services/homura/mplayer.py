@@ -9,10 +9,11 @@ from services.homura import database
 
 async def music_player(ctx:commands.Context, search):
         voice = ctx.author.voice.channel
-        guild_id = str(ctx.guild.id)
+        music_db = database.musicQueue_db[str(ctx.guild.id)]
 
         if ctx.voice_client is None:
-            await clear_queue(ctx)
+            music_db.delete_many({})
+
             vc = await voice.connect()
             vcn = False
         else:
@@ -28,7 +29,6 @@ async def music_player(ctx:commands.Context, search):
             }
         })
 
-        music_db = database.musicQueue_db[guild_id]
         info = ydl.extract_info(search, download=False)
 
         title = info["title"]
