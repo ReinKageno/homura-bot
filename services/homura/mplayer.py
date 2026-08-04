@@ -12,7 +12,7 @@ async def music_player(ctx:commands.Context, search):
         guild_id = str(ctx.guild.id)
 
         if ctx.voice_client is None:
-            clear_queue(ctx)
+            await clear_queue(ctx)
             vc = await voice.connect()
             vcn = False
         else:
@@ -172,7 +172,7 @@ async def clear_queue(ctx:commands.Context):
     ctx.send('The queue successfully cleared.')
 
 async def music_stop(ctx:commands.Context):
-    clear_queue(ctx)
+    await clear_queue(ctx)
 
     if ctx.voice_client:
         if ctx.voice_client.is_playing():
