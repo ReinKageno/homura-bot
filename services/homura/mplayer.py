@@ -56,7 +56,7 @@ async def play_next(ctx:commands.Context):
     loop = asyncio.get_running_loop()
 
     if ctx.voice_client is None:
-        ctx.send("I'm not in a voice channel. Can't play the audio.")
+        await ctx.send("I'm not in a voice channel. Can't play the audio.")
         return
     else:
         channel = ctx.voice_client
@@ -103,7 +103,7 @@ async def clear(ctx:commands.Context, skip=1, stop=False):
     if stop and ctx.voice_client:
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            ctx.send(f'Skipping {skip+1} song.')
+            await ctx.send(f'Skipping {skip+1} song.')
             await play_next(ctx)
 
 async def remove_queue(ctx:commands.Context, query):
@@ -115,7 +115,7 @@ async def remove_queue(ctx:commands.Context, query):
         query = int(query)
 
         if query == 0:
-            ctx.send('Queue is not changed, nothing to remove.')
+            await ctx.send('Queue is not changed, nothing to remove.')
             return
 
         if query < 0:
@@ -135,7 +135,7 @@ async def remove_queue(ctx:commands.Context, query):
             return
 
         music_db.delete_one({'_id': db_doc['_id']})
-        ctx.send(f"Queue: {db_doc['name']} at line {query} has been removed.")
+        await ctx.send(f"Queue: {db_doc['name']} at line {query} has been removed.")
         return
     
     arg = " ".join(query)
@@ -169,7 +169,7 @@ async def clear_queue(ctx:commands.Context):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
 
     music_db.delete_many({})
-    ctx.send('The queue successfully cleared.')
+    await ctx.send('The queue successfully cleared.')
 
 async def music_stop(ctx:commands.Context):
     await clear_queue(ctx)
