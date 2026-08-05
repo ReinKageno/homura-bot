@@ -3,6 +3,7 @@ import json
 import random
 import discord
 from discord.ext import commands
+from pyauxy import hpril
 
 DATA_PATH = 'data/'
 
@@ -47,11 +48,11 @@ async def send_gif(ctx:commands.Context, member, action):
         embed.set_image(url=gif)
 
         await ctx.send(embed=embed)
-        print(f"A gif has been sent to {ctx.message.id}")
+        hpril(f"A gif has been sent")
 
     else:
         msg_id = ctx.message.id
-        print(f'Error at {msg_id}')
+        hpril(f'Error at {msg_id}')
         await ctx.send(
             f"An error occured, please contact the developer\n"
             f"-# id {msg_id}"

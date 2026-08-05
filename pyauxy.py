@@ -1,4 +1,7 @@
 
+def hpril(*values: object, id: int | None = None):
+    print(f'[HOMURA]{f' [{id}]' if id else None}', {values})
+
 def printc(message, color='default'):
     match color:
         case 'default':

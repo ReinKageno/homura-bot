@@ -4,7 +4,7 @@ import argparse
 import discord
 import logging
 import logging.handlers
-import pyauxy.pcolors as pclr
+import pyauxy
 from config import config
 from discord.ext import commands
 from dotenv import load_dotenv
@@ -48,7 +48,7 @@ class Homura(commands.Bot):
         await self.load_extension('services.voice')
 
         if getattr(args, 'debug', False):
-            print(f'{pclr.strc("Syncing with guid ", "yellow")}{DUMMY_GUILD.id}')
+            print(f'{pyauxy.strc("Syncing with guid ", "yellow")}{DUMMY_GUILD.id}')
             self.tree.copy_global_to(guild=DUMMY_GUILD)
             await self.tree.sync(guild=DUMMY_GUILD)
         else:
@@ -58,7 +58,7 @@ class Homura(commands.Bot):
 
     async def on_ready(self):
         if getattr(args, 'debug', False):
-            pclr.printc('Bot is running in DEBUG mode.', 'yellow')
+            pyauxy.printc('Bot is running in DEBUG mode.', 'yellow')
 
         print(f'Logged in as {self.user}')
 

@@ -5,79 +5,135 @@ import time
 import re
 import yt_dlp
 from discord.ext import commands
+from pyauxy import hpril
 from services.homura import database
 
+QUEUE_YDL = yt_dlp.YoutubeDL({
+    'format': 'bestaudio',
+    'extract_flat': True,
+    'quiet': True,
+    'noplaylist': True,
+    'js_runtimes': {
+        'deno': {
+            'path':'../tools/deno/deno'
+        }
+    }
+})
+
+PLAY_YDL = yt_dlp.YoutubeDL({
+    'format': 'bestaudio',
+    'quiet': True,
+    'noplaylist': True,
+    'js_runtimes': {
+        'deno': {
+            'path':'../tools/deno/deno'
+        }
+    }
+})
+
+player_locks = {}
+
+def get_lock(guild_id):
+    if guild_id not in player_locks:
+        player_locks[guild_id] = asyncio.Lock()
+
+    return player_locks[guild_id]
+
 async def music_player(ctx:commands.Context, query):
+        if not ctx.author.voice:
+            await ctx.send(f'Please use when you inside a voice channel.')
+            return
+        
         voice = ctx.author.voice.channel
-        music_db = database.musicQueue_db[str(ctx.guild.id)]
+        guild_id = ctx.guild.id
+        music_db = database.musicQueue_db[str(guild_id)]
+        queue_null = True
 
         if ctx.voice_client is None:
             music_db.delete_many({})
 
             vc = await voice.connect()
-            vcn = False
         else:
             vc = ctx.voice_client
-            vcn = True
-        
-        ydl = yt_dlp.YoutubeDL({
-            'format': 'bestaudio',
-            'js_runtimes': {
-                'deno': {
-                    'path':'../tools/deno/deno'
-                }
-            }
-        })
 
-        info = ydl.extract_info(search, download=False)
+        if music_db.count_documents({}) != 0:
+            queue_null = False
 
-        title = info["title"]
-        artist = info["channel"]
-        url = info["url"]
+        info = await asyncio.to_thread(
+            QUEUE_YDL.extract_info,
+            query,
+            download=False
+        )
 
         music_db.insert_one({
-            'title': title,
-            'artist': artist,
-            'url': search,
-            'stream_url': url,
-            'name': title + artist,
+            'title': info["title"],
+            'artist': info["channel"],
+            'webpage_url': query,
+            'requester': ctx.author.id,
             'created_at': int(time.time())
         })
 
         if not vc.is_playing() or vc.is_paused():
-            if vcn:
+            if not queue_null:
                 await ctx.send(f'Queue: {info["title"]} by {info["channel"]} successfully added.')
             await play_next(ctx)
         else:
-            await ctx.send(f'Queue: {title} by {artist} successfully added.')
+            await ctx.send(f'Queue: {info["title"]} by {info["channel"]} successfully added.')
 
 async def play_next(ctx:commands.Context):
-    music_db = database.musicQueue_db[str(ctx.guild.id)]
-    loop = asyncio.get_running_loop()
+    guild_id = ctx.guild.id
+    lock = get_lock(guild_id)
+    hpril('Attempting to play the audio', id=guild_id)
 
-    if ctx.voice_client is None:
-        await ctx.send("I'm not in a voice channel. Can't play the audio.")
-        return
-    else:
+    async with lock:
         channel = ctx.voice_client
+        if channel.is_playing() or channel.is_paused():
+            return
+        
+        hpril('Preparing the audio', id=guild_id)
+        music_db = database.musicQueue_db[str(guild_id)]
+        loop = asyncio.get_running_loop()
 
-    song = music_db.find_one({}, sort=[('created_at', 1)])
+        if ctx.voice_client is None:
+            await ctx.send("I'm not in a voice channel. Can't play the audio.")
+            return
+        else:
+            channel = ctx.voice_client
 
-    if not song:
-        await ctx.send('Music stopped, queue is empty.')
-        return
+        song = music_db.find_one({}, sort=[('created_at', 1)])
 
-    music_db.delete_one({"_id": song["_id"]})
+        if not song:
+            await ctx.send('Music stopped, queue is empty.')
+            hpril('No audio found', id=guild_id)
+            return
 
-    source = discord.FFmpegPCMAudio(song["stream_url"], before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5')
-
-    channel.play(
-        source,
-        after=lambda e: asyncio.run_coroutine_threadsafe(
-            play_next(ctx),
-            loop
+        info = await asyncio.to_thread(
+            PLAY_YDL.extract_info,
+            song['webpage_url'],
+            download=False
         )
-    )
+
+        stream_url = info['url']
+
+        source = discord.FFmpegPCMAudio(
+            stream_url,
+            before_options='-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+            options='-ar 48000 -ac 2 -af "aresample=async=1"'
+        )
+
+        def after(error):
+            if error:
+                print(error)
+
+            music_db.delete_one({"_id": song["_id"]})
+
+            asyncio.run_coroutine_threadsafe(
+                play_next(ctx),
+                loop
+            )
+
+        await ctx.send(f'Playing {song['title']}')
+        channel.play(source, after=after)
 
 async def clear(ctx:commands.Context, skip=1, stop=False):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
