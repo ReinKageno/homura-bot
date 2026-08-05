@@ -56,6 +56,9 @@ async def music_player(ctx:commands.Context, query):
         else:
             vc = ctx.voice_client
 
+            if vc is None or not vc.is_connected():
+                vc = await voice.connect()
+
         if music_db.count_documents({}) != 0:
             queue_null = False
 
@@ -87,6 +90,13 @@ async def play_next(ctx:commands.Context):
 
     async with lock:
         channel = ctx.voice_client
+
+        if channel is None:
+            return
+
+        if not channel.is_connected():
+            return
+
         if channel.is_playing() or channel.is_paused():
             return
         
