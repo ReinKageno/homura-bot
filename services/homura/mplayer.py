@@ -7,7 +7,7 @@ import yt_dlp
 from discord.ext import commands
 from services.homura import database
 
-async def music_player(ctx:commands.Context, search):
+async def music_player(ctx:commands.Context, query):
         voice = ctx.author.voice.channel
         music_db = database.musicQueue_db[str(ctx.guild.id)]
 
@@ -44,9 +44,9 @@ async def music_player(ctx:commands.Context, search):
             'created_at': int(time.time())
         })
 
-        if not vc.is_playing():
+        if not vc.is_playing() or vc.is_paused():
             if vcn:
-                await ctx.send(f'Queue: {title} by {artist} successfully added.')
+                await ctx.send(f'Queue: {info["title"]} by {info["channel"]} successfully added.')
             await play_next(ctx)
         else:
             await ctx.send(f'Queue: {title} by {artist} successfully added.')
@@ -85,11 +85,11 @@ async def clear(ctx:commands.Context, skip=1, stop=False):
     if skip is str:
         skip = int(skip)
 
-    if skip == 0 and not stop:
+    if skip == 1 and not stop:
         await clear_queue(ctx)
         return
 
-    if skip > 0:
+    if skip > 1:
         rm_queue = list(
             music_db.find({}, sort=[("created_at", 1)], limit=skip)
         )
@@ -103,8 +103,7 @@ async def clear(ctx:commands.Context, skip=1, stop=False):
     if stop and ctx.voice_client:
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            await ctx.send(f'Skipping {skip+1} song.')
-            await play_next(ctx)
+            await ctx.send(f'Skipping {skip} song.')
 
 async def remove_queue(ctx:commands.Context, query):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
@@ -162,7 +161,7 @@ async def remove_queue(ctx:commands.Context, query):
         music_db.delete_one({'_id': song['_id']})
         await ctx.send(f"{song['title']} successfully removed.")
     else:
-        await ctx.send(f"I cannot find {query} in queue. Cannot remove something doesn't exist.")
+        await ctx.send(f"I can't find {query} in queue. Remove something doesn't exist is not possible.")
         return
 
 async def clear_queue(ctx:commands.Context):
@@ -171,8 +170,52 @@ async def clear_queue(ctx:commands.Context):
     music_db.delete_many({})
     await ctx.send('The queue successfully cleared.')
 
+async def show_queue(bot, ctx:commands.Context):
+    music_db = database.musicQueue_db[str(ctx.guild.id)]
+    text = []
+
+    music_list = list(
+        music_db.find(
+            {},
+            {
+                'title': 1,
+                'artist': 1,
+                'requester': 1,
+                '_id': 0
+            }
+        ).sort('created_at', 1)
+    )
+
+    text.extend([
+        '**Now Playing** \n────────────\n','```\n',
+        f'{music_list[0]['title']} by {music_list[0]['artist']}\n',
+        f'Requested by {await bot.fetch_user(music_list[0]['requester'])}\n\n',
+        '```'
+    ])
+
+    music_list.pop(0)
+    if music_list:
+        text.append('\n **Queue**\n──────\n')
+
+    i = 0
+
+    for music in music_list:
+        i += 1
+        text.extend([
+            '```\n',
+            f'[{i}].{music['title']} by {music['artist']}\n',
+            f'? Requested by {await bot.fetch_user(music['requester'])}\n',
+            '```'
+        ])
+
+    msg = "".join(text)
+
+    await ctx.send(msg)
+
 async def music_stop(ctx:commands.Context):
-    await clear_queue(ctx)
+    music_db = database.musicQueue_db[str(ctx.guild.id)]
+
+    music_db.delete_many({})
 
     if ctx.voice_client:
         if ctx.voice_client.is_playing():

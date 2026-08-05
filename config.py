@@ -2,9 +2,9 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Config:
-    VERSION = "4.0.0"
+    VERSION = "4.1"
     BOT_NAME = "Homura"
     CREATOR = "Kanade"
-    PREFIX = "!"
+    PREFIX = "$"
 
 config = Config()

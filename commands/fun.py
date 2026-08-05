@@ -21,8 +21,12 @@ class Fun(commands.Cog):
         await mplayer.clear(ctx, num)
 
     @commands.command(help='Skip the current audio, can skip more than single audios (will skip from the older queue).')
-    async def skipm(self, ctx, *, num=0):
+    async def skipm(self, ctx, *, num=1):
         await mplayer.clear(ctx, num, stop=True)
+
+    @commands.command(help='Show the details of current queue.')
+    async def queue(self, ctx):
+        await mplayer.show_queue(self.bot, ctx)
 
     @commands.command(help='Stop the audio and leave the voice channel.')
     async def stopm(self, ctx):
