@@ -5,6 +5,7 @@ import time
 import re
 import yt_dlp
 from discord.ext import commands
+from urllib.parse import urlparse, parse_qs 
 from pyauxy import hprint
 from services.homura import database
 
@@ -39,7 +40,7 @@ def get_lock(guild_id):
 
     return player_locks[guild_id]
 
-async def music_player(ctx:commands.Context, query):
+async def music_player(ctx:commands.Context, search):
         if not ctx.author.voice:
             await ctx.send(f'Please use when you inside a voice channel.')
             return
@@ -62,16 +63,29 @@ async def music_player(ctx:commands.Context, query):
         if music_db.count_documents({}) != 0:
             queue_null = False
 
+        if is_url(search):
+            query = clean_youtube_url(search)
+        else:
+            hprint(f"Searching for {search}'s audio", id=guild_id)
+            query = f'ytsearch:{search}'
+
         info = await asyncio.to_thread(
             QUEUE_YDL.extract_info,
             query,
             download=False
         )
 
+        if 'entries' in info:
+            info = next(iter(info['entries']), None)
+
+        if info is None:
+            await ctx.send('No results found.')
+            return
+
         music_db.insert_one({
             'title': info["title"],
             'artist': info["channel"],
-            'webpage_url': query,
+            'webpage_url': info['url'],
             'requester': ctx.author.id,
             'created_at': int(time.time())
         })
@@ -116,6 +130,8 @@ async def play_next(ctx:commands.Context):
             await ctx.send('Music stopped, queue is empty.')
             hprint('No audio found', id=guild_id)
             return
+
+        hprint(f'Attempting to streaming {song['webpage_url']}', id=guild_id)
 
         info = await asyncio.to_thread(
             PLAY_YDL.extract_info,
@@ -290,3 +306,32 @@ async def music_stop(ctx:commands.Context):
         await ctx.send('Disconnected.')
     else:
         await ctx.send("I'm not in a voice channel.")
+
+def is_url(text: str):
+    try:
+        result = urlparse(text)
+        return all([result.query ,result.scheme, result.netloc])
+    except Exception:
+        return False
+
+def clean_youtube_url(url: str):
+    parsed = is_url(url)
+
+    if not parsed:
+        return url
+
+    YOUTUBE_HOSTS = {
+        "youtube.com",
+        "www.youtube.com",
+        "m.youtube.com",
+        "music.youtube.com",
+        "youtu.be",
+    }
+
+    if YOUTUBE_HOSTS in parsed.netloc.lower():
+        query = parse_qs(parsed.query)
+
+        if 'v' in query:
+            return f"https://www.youtube.com/watch?v={query['v'][0]}"
+
+    return url
