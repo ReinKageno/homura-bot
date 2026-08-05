@@ -312,12 +312,12 @@ def is_url(text: str):
         result = urlparse(text)
         return all([result.query ,result.scheme, result.netloc])
     except Exception:
-        return text
+        return False
 
 def clean_youtube_url(url: str):
     parsed = is_url(url)
 
-    if not parsed:
+    if not parsed.netloc or parsed.query:
         return url
 
     YOUTUBE_HOSTS = {
