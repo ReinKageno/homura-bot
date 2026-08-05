@@ -34,6 +34,8 @@ PLAY_YDL = yt_dlp.YoutubeDL({
 
 player_locks = {}
 
+URL_RE = re.compile(r"^https?://", re.IGNORECASE)
+
 def get_lock(guild_id):
     if guild_id not in player_locks:
         player_locks[guild_id] = asyncio.Lock()
@@ -308,16 +310,12 @@ async def music_stop(ctx:commands.Context):
         await ctx.send("I'm not in a voice channel.")
 
 def is_url(text: str):
-    try:
-        result = urlparse(text)
-        return all([result.query ,result.scheme, result.netloc])
-    except Exception:
-        return False
+    return bool(URL_RE.match(text))
 
 def clean_youtube_url(url: str):
-    parsed = is_url(url)
+    parsed = urlparse(url)
 
-    if not parsed.netloc or parsed.query:
+    if is_url(url):
         return url
 
     YOUTUBE_HOSTS = {
