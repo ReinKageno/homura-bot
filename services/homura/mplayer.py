@@ -5,7 +5,7 @@ import time
 import re
 import yt_dlp
 from discord.ext import commands
-from pyauxy import hpril
+from pyauxy import hprint
 from services.homura import database
 
 QUEUE_YDL = yt_dlp.YoutubeDL({
@@ -86,7 +86,7 @@ async def music_player(ctx:commands.Context, query):
 async def play_next(ctx:commands.Context):
     guild_id = ctx.guild.id
     lock = get_lock(guild_id)
-    hpril('Attempting to play the audio', id=guild_id)
+    hprint('Attempting to play the audio', id=guild_id)
 
     async with lock:
         channel = ctx.voice_client
@@ -100,7 +100,7 @@ async def play_next(ctx:commands.Context):
         if channel.is_playing() or channel.is_paused():
             return
         
-        hpril('Preparing the audio', id=guild_id)
+        hprint('Preparing the audio', id=guild_id)
         music_db = database.musicQueue_db[str(guild_id)]
         loop = asyncio.get_running_loop()
 
@@ -114,7 +114,7 @@ async def play_next(ctx:commands.Context):
 
         if not song:
             await ctx.send('Music stopped, queue is empty.')
-            hpril('No audio found', id=guild_id)
+            hprint('No audio found', id=guild_id)
             return
 
         info = await asyncio.to_thread(

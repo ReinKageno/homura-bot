@@ -2,7 +2,7 @@
 import asyncio
 import discord
 from discord.ext import commands
-from pyauxy import hpril
+from pyauxy import hprint
 
 class VoiceEventHandler(commands.Cog):
     def __init__(self, bot):
@@ -24,13 +24,13 @@ class VoiceEventHandler(commands.Cog):
             task = self.disconnected_tasks.pop(member.guild.id, None)
             if task:
                 task.cancel()
-                hpril(f'Voice channel disconnect task canceled', id=member.guild.id)
+                hprint(f'Voice channel disconnect task canceled', id=member.guild.id)
             return
 
         if member.guild.id in self.disconnected_tasks:
             return
 
-        hpril(f'Attempting to disconnect from voice channel', id=member.guild.id)
+        hprint(f'Attempting to disconnect from voice channel', id=member.guild.id)
 
         self.disconnected_tasks[member.guild.id] = asyncio.create_task(
             self.disconnect_after_timeout(member.guild)
@@ -55,7 +55,7 @@ class VoiceEventHandler(commands.Cog):
             if not humans:
                 await voice.disconnect()
                 self.disconnected_tasks.pop(guild.id, None)
-                hpril(f'Disconnected from voice channel', id=guild.id)
+                hprint(f'Disconnected from voice channel', id=guild.id)
 
         except asyncio.CancelledError:
             return

@@ -8,6 +8,8 @@ class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # Audio/Music command field
+
     @commands.command(help='Play audio on a voice channel. You must inside a voice channel to use this command.')
     async def playm(self, ctx, *, search):
         await mplayer.music_player(ctx, search)
@@ -31,6 +33,8 @@ class Fun(commands.Cog):
     @commands.command(help='Stop the audio and leave the voice channel.')
     async def stopm(self, ctx):
         await mplayer.music_stop(ctx)
+
+    # GIFs command field
 
     @commands.hybrid_command(
             name='cry', description="Just cry",

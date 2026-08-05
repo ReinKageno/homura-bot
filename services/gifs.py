@@ -3,7 +3,7 @@ import json
 import random
 import discord
 from discord.ext import commands
-from pyauxy import hpril
+from pyauxy import hprint
 
 DATA_PATH = 'data/'
 
@@ -31,11 +31,14 @@ def get_message(category, alone:bool):
 
 async def send_gif(ctx:commands.Context, member, action):
     _author = ctx.author.mention
-    _mention = member.mention if member else None
-    solo = True if member else False
+    _mention = None
+    alone = True
+    if member:
+        _mention = member.mention
+        alone = False
 
     gif = get_gif(action)
-    msg = get_message(action, solo).format(
+    msg = get_message(action, alone).format(
         author = _author,
         target = _mention
     )
@@ -48,11 +51,9 @@ async def send_gif(ctx:commands.Context, member, action):
         embed.set_image(url=gif)
 
         await ctx.send(embed=embed)
-        hpril(f"A gif has been sent")
-
     else:
         msg_id = ctx.message.id
-        hpril(f'Error at {msg_id}')
+        hprint(f'GIF Service: Error at {msg_id}')
         await ctx.send(
             f"An error occured, please contact the developer\n"
             f"-# id {msg_id}"
