@@ -19,12 +19,12 @@ class Fun(commands.Cog):
         await mplayer.remove_queue(ctx, query)
 
     @commands.command(help='Clear the queue, keep playing the current audio.')
-    async def clearm(self, ctx, *, num):
-        await mplayer.clear(ctx, num)
+    async def clearm(self, ctx, *, num=1):
+        await mplayer.clear_queue(ctx, num, clear=True)
 
     @commands.command(help='Skip the current audio, can skip more than single audios (will skip from the older queue).')
     async def skipm(self, ctx, *, num=1):
-        await mplayer.clear(ctx, num, stop=True)
+        await mplayer.clear_queue(ctx, num, clear=False)
 
     @commands.command(help='Show the details of current queue.')
     async def queue(self, ctx):

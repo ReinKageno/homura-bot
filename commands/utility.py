@@ -5,6 +5,8 @@ from config import config
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from pyauxy import hprint
+
 load_dotenv()
 git_avatar = os.getenv('GIT_AVA')
 
@@ -31,8 +33,8 @@ class Utility(commands.Cog):
         }
 
         for command in self.bot.commands:
-            prefix = '!/' if getattr(command, 'app_command', None) else '! '
-            lines.append(f'{f'`{prefix}` | `{command.name}':<{width}}` | {command.help} \n')
+            prefix = '!|/' if getattr(command, 'app_command', None) else '!| '
+            lines.append(f'{f'`{prefix}` | `{command.name}':<{width}}` {command.help} \n')
 
         if self.bot.tree.get_commands():
             slash_lines = []
@@ -40,7 +42,7 @@ class Utility(commands.Cog):
             for c in self.bot.tree.get_commands():
                 if c.name in hybrid_names:
                     continue
-                slash_lines.append(f'{f'` /` | `{c.name}':<{width}}` | {c.description} \n')
+                slash_lines.append(f'{f'` /` | `{c.name}':<{width}}` {c.description} \n')
 
         text.extend(lines)
         text.extend(slash_lines)
@@ -52,6 +54,47 @@ class Utility(commands.Cog):
             description=msg,
             color=0x4b37e6,
         )
+
+        embed.set_footer(
+            text='\u00a9 2026 KanadeRein',
+            icon_url=f"https://avatars.githubusercontent.com/u/{git_avatar}"
+        )
+
+        await ctx.send(embed=embed)
+
+    @commands.hybrid_command(name='status', description="Get bot's current status and news.", help="Get bot's current status and news.")
+    async def status(self, ctx:commands.Context):
+        text=[]
+
+        latency_ms = round(self.bot.latency * 1000)
+
+        text.append(f'**Ping:** {latency_ms}ms\n\n')
+        text.append(f'**Last changelog:**\n')
+
+        try:
+            with open('changelog.md', 'r', encoding='utf-8') as f:
+                clog = f.read()
+            text.extend(clog)
+
+            msg = "".join(text)
+
+            embed = discord.Embed(
+                title="My current status",
+                description=msg
+            )
+        except Exception:
+            hprint('File: changelog.md not found')
+
+        try:
+            with open('news.md', 'r', encoding='utf-8') as f:
+                news = f.read()
+
+            embed.add_field(
+                name='News',
+                value=news
+            )
+        except Exception:
+            hprint('File: news.md not found')
 
         embed.set_footer(
             text='\u00a9 2026 KanadeRein',
