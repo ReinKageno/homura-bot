@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Config:
-    VERSION = "4.2.4"
+    VERSION = "0.5.2"
     BOT_NAME = "Homura"
     CREATOR = "Kanade"
     PREFIX = "$"

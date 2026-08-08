@@ -1,5 +1,5 @@
-# Changelog 0.5.1
+# Changelog 0.5.2
 
 ## Bug fixed:
 
-- blocked `perms_set` did not respond because of debug line. lol
+- permission set up always set to users category

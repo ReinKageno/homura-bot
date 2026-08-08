@@ -22,11 +22,11 @@ class Security(commands.Cog):
     ):
         db = database.permission_db[str(interaction.guild_id)]
 
-        channel_id = int(interaction.channel_id)
+        channel_id = interaction.channel_id
         target_id = str(target.id)
-        target_type = 'roles' if target is discord.Role else 'users'
+        target_type = 'roles' if isinstance(target, discord.Role) else 'users'
 
-        result = db.update_one(
+        db.update_one(
             {'channel_id': channel_id},
             {
                 "$set": {
