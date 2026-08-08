@@ -195,11 +195,11 @@ async def play_next(ctx:commands.Context):
 async def clear_queue(ctx:commands.Context, skip=1, clear=False):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
 
-    if skip is str:
+    if isinstance(skip, str):
         skip = int(skip)
 
     # Clear the whole queue
-    if skip == 1 and clear:
+    if clear and ctx.voice_client:
         await clear_whole_queue(ctx)
         return
 
@@ -214,7 +214,7 @@ async def clear_queue(ctx:commands.Context, skip=1, clear=False):
             }
         })
 
-    if clear and ctx.voice_client:
+    if ctx.voice_client:
         if ctx.voice_client.is_playing():
             ctx.voice_client.stop()
             await ctx.send(f'Skipping {skip} song.')
