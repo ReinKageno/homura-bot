@@ -57,24 +57,25 @@ def get_lock(guild_id):
     return player_locks[guild_id]
 
 async def music_player(ctx:commands.Context, search):
+        guild_id = ctx.guild.id
+        voice_channel = ctx.author.voice.channel
+        
         if not ctx.author.voice:
             await ctx.send(f'Please use when you inside a voice channel.')
             return
         
-        voice = ctx.author.voice.channel
-        guild_id = ctx.guild.id
         music_db = database.musicQueue_db[str(guild_id)]
-        queue_null = True
+        empty_queue = True
 
         if ctx.voice_client is None:
             music_db.delete_many({})
 
-            vc = await voice.connect()
+            vc = await voice_channel.connect()
         else:
             vc = ctx.voice_client
 
             if vc is None or not vc.is_connected():
-                vc = await voice.connect()
+                vc = await voice_channel.connect()
 
         # Queue checker, currently not used
         if music_db.count_documents({}) != 0:

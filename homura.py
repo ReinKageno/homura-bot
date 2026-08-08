@@ -13,6 +13,7 @@ load_dotenv()
 
 parser = argparse.ArgumentParser(description='Run TC Big Sister discord bot')
 parser.add_argument('--debug', action='store_true', help='Run in debug mode')
+parser.add_argument('--debug-gateway', action='store_true', help='Debug for Discord gateway')
 args = parser.parse_args()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -20,13 +21,16 @@ DUMMY_GUILD = discord.Object(os.getenv('DUMMY_GUILD_ID'))
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
+logging.getLogger('discord.http').setLevel(logging.INFO)
 
-if hasattr(logging, 'HTTP'):
-    logging.getLogger('discord.http').setLevel(logging.INFO)
+if getattr(args, 'debug-gateway', False):
+    logging.getLogger('discord.gateway').setLevel(logging.DEBUG)
+else:
+    logging.getLogger('discord.gateway').setLevel(logging.INFO)
 
 handler = logging.handlers.RotatingFileHandler(
      filename='discord.log',
-     encoding='utf8',
+     encoding='utf-8',
      maxBytes=32 * 1024 * 1024,
      backupCount=5,
 )
@@ -45,6 +49,7 @@ class Homura(commands.Bot):
     async def setup_hook(self):
         await self.load_extension('commands.utility')
         await self.load_extension('commands.fun')
+        await self.load_extension('commands.security')
         await self.load_extension('services.voice')
 
         if getattr(args, 'debug', False):
