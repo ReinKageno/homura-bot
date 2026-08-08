@@ -52,13 +52,21 @@ async def check_permission(
         return users[user_id]
 
     roles = permissions.get('roles', {})
+    role_permissions = []
 
     for role in user.roles:
         role_id = str(role.id)
 
         if role_id in roles:
             hprint(f'Permission found for {role_id}')
-            return roles[role_id]
+            role_permissions.append(roles[role_id])
+
+    if True in role_permissions:
+        hprint(f'Permission granted for {role_id}')
+        return True
+
+    if role_permissions:
+        return False
 
     hprint('Permission is null', id=guild_id)
     return True

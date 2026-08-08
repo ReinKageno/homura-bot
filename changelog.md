@@ -1,5 +1,5 @@
-# Changelog 0.5.2
+# Changelog 0.5.3
 
 ## Bug fixed:
 
-- permission set up always set to users category
+- permissions won't override
