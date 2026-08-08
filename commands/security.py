@@ -35,7 +35,6 @@ class Security(commands.Cog):
             },
             upsert=True,
         )
-        hprint(f'Updated database: {result['_id']}', id=interaction.guild.id)
         await interaction.response.send_message(
             f'Permission {'enabled' if access else "disabled"} '
             f'for `{command}` for {target.mention}.'
