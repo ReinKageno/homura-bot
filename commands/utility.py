@@ -4,6 +4,8 @@ import discord
 from config import config
 from discord.ext import commands
 from dotenv import load_dotenv
+from services.homura.permission import has_permission
+from services.homura.permission import has_prefix_permission
 
 from pyauxy import hprint
 
@@ -69,6 +71,11 @@ class Utility(commands.Cog):
         latency_ms = round(self.bot.latency * 1000)
 
         text.append(f'**Ping:** {latency_ms}ms\n\n')
+        text.append(
+            f'Participate in supporting development:\n'
+            f'**[Homura on Github](https://github.com/ReinKageno/homura-bot)**\n'
+            f'**[Saweria to kanaede]({config.SAWERIA})**\n\n'
+        )
         text.append(f'**Last changelog:**\n')
 
         try:
@@ -104,6 +111,7 @@ class Utility(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(help='Tell me to join a Voice Channel.')
+    @has_prefix_permission()
     async def join(self, ctx:commands.Context):
         if ctx.author.voice:
             channel = ctx.author.voice.channel
@@ -114,6 +122,7 @@ class Utility(commands.Cog):
             await ctx.send("You must be in a voice channel for me to join.")
 
     @commands.command(help='Graceful way to disconnect from a Voice Channel')
+    @has_prefix_permission()
     async def leave(self, ctx:commands.Context):
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
@@ -122,6 +131,7 @@ class Utility(commands.Cog):
             await ctx.send("I am not connected to a voice channel.")
 
     @commands.command(help='Ping me to check.')
+    @has_prefix_permission()
     async def ping(self, ctx):
         guild_id = ctx.guild.id
         channel_id = ctx.channel.id
@@ -129,7 +139,8 @@ class Utility(commands.Cog):
             f"Pong!\n\n"
             f"**Guild:** {guild_id}\n"
             f"**Channel:** {channel_id}\n"
-            f"**Status:** Online"
+            f"**Status:** Online\n"
+            f"**Go Support:** {config.SAWERIA}"
         )
 
 async def setup(bot):

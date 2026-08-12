@@ -3,7 +3,6 @@ import config
 import discord
 from discord import app_commands
 from discord.ext import commands
-from pyauxy import hprint
 from services.homura import database
 
 BOT_OWNER_ID = config.config.MASTER
@@ -27,7 +26,6 @@ async def check_permission(
         command_name: str,
         user: discord.Member
 ) -> bool:
-    hprint('PREFIX PERMISSION CHECK')
     db = database.permission_db[str(guild_id)]
 
     channel_db = db.find_one({
@@ -35,21 +33,21 @@ async def check_permission(
     })
 
     if not channel_db:
-        hprint('Channel permission not found', id=guild_id)
         return True
 
     permissions = channel_db.get('commands', {}).get(command_name, {})
 
     if not permissions:
-        hprint('No permission found', id=guild_id)
         return True
 
     users = permissions.get('users', {})
     user_id = str(user.id)
 
     if user_id in users:
-        hprint(f'Permission found for {user_id}')
-        return users[user_id]
+        if True in user[user_id]:
+            return users[user_id]
+        
+        return False
 
     roles = permissions.get('roles', {})
     role_permissions = []
@@ -58,17 +56,14 @@ async def check_permission(
         role_id = str(role.id)
 
         if role_id in roles:
-            hprint(f'Permission found for {role_id}')
             role_permissions.append(roles[role_id])
 
     if True in role_permissions:
-        hprint(f'Permission granted for {role_id}')
         return True
 
     if role_permissions:
         return False
 
-    hprint('Permission is null', id=guild_id)
     return True
 
 def has_permission():

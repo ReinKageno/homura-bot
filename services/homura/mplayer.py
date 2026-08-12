@@ -11,14 +11,19 @@ from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qs 
 from pyauxy import hprint
 from services.homura import database
+from config import config
+
+prefix = config.PREFIX
 
 load_dotenv()
 git_avatar = os.getenv('GIT_AVA')
 
+dlp_quiet = True
+
 QUEUE_YDL = yt_dlp.YoutubeDL({
     'format': 'bestaudio',
     'extract_flat': True,
-    'quiet': True,
+    'quiet': dlp_quiet,
     'noplaylist': True,
     'js_runtimes': {
         'deno': {
@@ -28,8 +33,10 @@ QUEUE_YDL = yt_dlp.YoutubeDL({
 })
 
 PLAY_YDL = yt_dlp.YoutubeDL({
+    'fragment_retries': 10,
+    'retry_on_http_error': True,
     'format': 'bestaudio',
-    'quiet': True,
+    'quiet': dlp_quiet,
     'noplaylist': True,
     'js_runtimes': {
         'deno': {
@@ -58,11 +65,13 @@ def get_lock(guild_id):
 
 async def music_player(ctx:commands.Context, search):
         guild_id = ctx.guild.id
-        voice_channel = ctx.author.voice.channel
-        
+
+        # Check if user on a voice channel      
         if not ctx.author.voice:
             await ctx.send(f'Please use when you inside a voice channel.')
             return
+
+        voice_channel = ctx.author.voice.channel
         
         music_db = database.musicQueue_db[str(guild_id)]
         empty_queue = True
@@ -131,12 +140,14 @@ async def play_next(ctx:commands.Context):
 
     guild_id = ctx.guild.id
     lock = get_lock(guild_id)
-    hprint('Attempting to play the audio', id=guild_id)
+    hprint('Attempting to play an audio', id=guild_id)
 
     async with lock:
         channel = ctx.voice_client
 
+        # Trio security checker
         if channel is None:
+            await ctx.send("I'm not in a voice channel. Can't play the audio.")
             return
 
         if not channel.is_connected():
@@ -148,12 +159,6 @@ async def play_next(ctx:commands.Context):
         hprint('Preparing the audio', id=guild_id)
         music_db = database.musicQueue_db[str(guild_id)]
         loop = asyncio.get_running_loop()
-
-        if ctx.voice_client is None:
-            await ctx.send("I'm not in a voice channel. Can't play the audio.")
-            return
-        else:
-            channel = ctx.voice_client
 
         song = music_db.find_one({}, sort=[('created_at', 1)])
 
@@ -192,32 +197,58 @@ async def play_next(ctx:commands.Context):
         await ctx.send(f'Playing {song['title']} by {song['artist']}')
         channel.play(source, after=after)
 
-async def clear_queue(ctx:commands.Context, skip=1, clear=False):
+async def clear_queue(ctx:commands.Context, amount:str='1', args:str=None):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
 
-    if skip is str:
-        skip = int(skip)
-
-    # Clear the whole queue
-    if skip == 1 and clear:
-        await clear_whole_queue(ctx)
+    if not music_db.find_one({}):
+        hprint('No documents found', ctx.guild.id)
         return
 
-    if skip > 1:
-        rm_queue = list(
-            music_db.find({}, sort=[("created_at", 1)], limit=skip)
+    if amount != "-n":
+        pattern = r"^\d+$"
+
+        if not bool(re.fullmatch(pattern, amount)):
+            await ctx.send(
+                "Queue: Cannot process the request\n"
+                "**[reason]** Invalid number"
+                )
+            return
+
+        music_skip = int(amount)
+
+        if music_skip < 1:
+            await ctx.send(
+                "Queue: Cannot process the request\n"
+                "**[reason]** The number cannot be below 1"
+                )
+
+    else:
+        music_skip = 1
+
+    stop_current = False if amount == "-n" or args == "-n" else True
+
+    rm_queue = list(
+        music_db.find(
+            {},
+            sort=[("created_at", 1)],
+            limit=music_skip if stop_current else music_skip + 1
         )
+    )
 
-        music_db.delete_many({
-            "_id": {
-                "$in": [doc["_id"] for doc in rm_queue]
-            }
-        })
+    if not stop_current:
+        rm_queue.pop(0)
 
-    if clear and ctx.voice_client:
-        if ctx.voice_client.is_playing():
+    music_db.delete_many({
+        "_id": {
+            "$in": [doc["_id"] for doc in rm_queue]
+        }
+    })
+
+    if ctx.voice_client:
+        if stop_current and ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            await ctx.send(f'Skipping {skip} song.')
+
+        await ctx.send(f'Skipping {music_skip} song.')
 
 async def remove_queue(ctx:commands.Context, query):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
@@ -229,8 +260,8 @@ async def remove_queue(ctx:commands.Context, query):
 
         if query == 0:
             await ctx.send(
-                'Queue is not changed, nothing to remove.\n'+
-                'Try `!skipm` if you want to skip current audio.'
+                f'Queue: nothing is changed, nothing to remove.\n'+
+                f'Try `{prefix}skipm` if you want to skip current audio.'
             )
             return
 
@@ -247,14 +278,14 @@ async def remove_queue(ctx:commands.Context, query):
             await ctx.send("That queue position doesn't exit.")
             return
 
-        music_db.delete_one({'_id': db_doc['_id']})
-        await ctx.send(f"Queue: [{query}] {db_doc['title']} has been removed.")
+        song = music_db.find({'_id': db_doc['_id']})
+        message = f"Queue: [{query}] {db_doc['title']} has been removed."
         return
     
     arg = " ".join(query)
 
     if  arg.startswith(("http://", "https://")):
-        music_db.delete_one({'webpage_url': arg})
+        song = music_db.find_one({'webpage_url': arg})
     else:
         song = music_db.find_one({
             'title': {
@@ -262,12 +293,20 @@ async def remove_queue(ctx:commands.Context, query):
                 '$options': 'i'
             }
         })
+        message = f"Queue: Successfully remove {song['title']}."
 
     if song:
+        current_audio = music_db.find_one({}, sort=[('created_at', 1)])
+        if song['title'] == current_audio['title']:
+            await ctx.send(
+                f"Queue: Cannot remove {song['title']} because it is still playing.\n"
+                f"Try `{prefix}skipm` to skip.")
+            return
+
         music_db.delete_one({'_id': song['_id']})
-        await ctx.send(f"Queue: {song['title']} successfully removed.")
+        await ctx.send(message)
     else:
-        await ctx.send(f"I can't find {query} in queue. Remove something doesn't exist is not possible.")
+        await ctx.send(f"Queue: I can't find {query} in queue. Remove something doesn't exist is not possible.")
         return
 
 async def clear_whole_queue(ctx:commands.Context):

@@ -2,7 +2,7 @@
 import discord
 from discord.ext import commands
 from services import gifs
-from services.homura import mplayer
+from services.homura import mplayer 
 from services.homura.permission import has_permission
 from services.homura.permission import has_prefix_permission
 
@@ -12,25 +12,25 @@ class Fun(commands.Cog):
 
     # Audio/Music command field
 
-    @commands.command(help='Play audio on a voice channel. You must inside a voice channel to use this command.')
+    @commands.command(help='Play audio on a voice channel.')
     @has_prefix_permission()
     async def playm(self, ctx, *, search):
         await mplayer.music_player(ctx, search)
 
-    @commands.command(help='Remove specifict audio from queue. Supported by title or link, also works by order by telling a specific number.')
+    @commands.command(help='Remove specifict audio from queue.')
     @has_prefix_permission()
-    async def revokem(self, ctx, *, query):
+    async def removem(self, ctx, *, query):
         await mplayer.remove_queue(ctx, query)
 
     @commands.command(help='Clear the queue, keep playing the current audio.')
     @has_prefix_permission()
-    async def clearm(self, ctx, *, num=1):
-        await mplayer.clear_queue(ctx, num, clear=True)
+    async def clearm(self, ctx):
+        await mplayer.clear_whole_queue(ctx)
 
-    @commands.command(help='Skip the current audio, can skip more than single audios (will skip from the older queue).')
+    @commands.command(help='Skip one or more queue(s).')
     @has_prefix_permission()
-    async def skipm(self, ctx, *, num=1):
-        await mplayer.clear_queue(ctx, num, clear=False)
+    async def skipm(self, ctx, num='1', skip_current=None):
+        await mplayer.clear_queue(ctx, num, skip_current)
 
     @commands.command(help='Show the details of current queue.')
     @has_prefix_permission()
