@@ -1,11 +1,5 @@
-# Changelog 0.6.0
+# Changelog 0.6.1
 
-## What's new?
+## Bugs fixed
 
-- Spotify link supported and streaming them with youtube.
-- Add response a response for `playm` to let know if the bot has received the request.
-
-## Changed
-
-- FFMPEG can run locally as tools
-- add spotdl to `requirements.txt`
+- Fixed unexpected conflict error after merge

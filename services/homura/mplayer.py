@@ -349,6 +349,9 @@ async def clear_queue(ctx:commands.Context, amount:str='1', args:str=None):
             {},
             sort=[("created_at", 1)],
             limit=music_skip if stop_current else music_skip + 1
+        )
+    )
+
     if amount != "-n":
         pattern = r"^\d+$"
 
@@ -382,7 +385,6 @@ async def clear_queue(ctx:commands.Context, amount:str='1', args:str=None):
 
     if not stop_current:
         rm_queue.pop(0)
-    )
 
     if not stop_current:
         rm_queue.pop(0)
@@ -399,14 +401,10 @@ async def clear_queue(ctx:commands.Context, amount:str='1', args:str=None):
     })
 
     if ctx.voice_client:
-        if stop_current and ctx.voice_client.is_playing():
-    if ctx.voice_client:
-        if stop_current and ctx.voice_client.is_playing():
+        if stop_current and ctx.voice_client.is_playing():            
             ctx.voice_client.stop()
 
-        await ctx.send(f'Skipping {music_skip} song.')
-
-        await ctx.send(f'Skipping {music_skip} song.')
+    await ctx.send(f'Skipping {music_skip} song.')
 
 async def remove_queue(ctx:commands.Context, query):
     music_db = database.musicQueue_db[str(ctx.guild.id)]
@@ -418,8 +416,6 @@ async def remove_queue(ctx:commands.Context, query):
 
         if query == 0:
             await ctx.send(
-                f'Queue: nothing is changed, nothing to remove.\n'+
-                f'Try `{prefix}skipm` if you want to skip current audio.'
                 f'Queue: nothing is changed, nothing to remove.\n'+
                 f'Try `{prefix}skipm` if you want to skip current audio.'
             )
@@ -440,14 +436,12 @@ async def remove_queue(ctx:commands.Context, query):
 
         song = music_db.find({'_id': db_doc['_id']})
         message = f"Queue: [{query}] {db_doc['title']} has been removed."
-        song = music_db.find({'_id': db_doc['_id']})
-        message = f"Queue: [{query}] {db_doc['title']} has been removed."
         return
     
     arg = " ".join(query)
 
     if  arg.startswith(("http://", "https://")):
-        song = music_db.find_one({'source_url': arg})
+        music_db.delete_one({'webpage_url': arg})
     else:
         song = music_db.find_one({
             'title': {
@@ -455,7 +449,6 @@ async def remove_queue(ctx:commands.Context, query):
                 '$options': 'i'
             }
         })
-        message = f"Queue: Successfully remove {song['title']}."
         message = f"Queue: Successfully remove {song['title']}."
 
     if song:
@@ -466,18 +459,9 @@ async def remove_queue(ctx:commands.Context, query):
                 f"Try `{prefix}skipm` to skip.")
             return
 
-        current_audio = music_db.find_one({}, sort=[('created_at', 1)])
-        if song['title'] == current_audio['title']:
-            await ctx.send(
-                f"Queue: Cannot remove {song['title']} because it is still playing.\n"
-                f"Try `{prefix}skipm` to skip.")
-            return
-
         music_db.delete_one({'_id': song['_id']})
         await ctx.send(message)
-        await ctx.send(message)
     else:
-        await ctx.send(f"Queue: I can't find {query} in queue. Remove something doesn't exist is not possible.")
         await ctx.send(f"Queue: I can't find {query} in queue. Remove something doesn't exist is not possible.")
         return
 
