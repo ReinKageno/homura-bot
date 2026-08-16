@@ -1,0 +1,1 @@
+Drop your bin folder with ffmpeg and ffprobe inside here.

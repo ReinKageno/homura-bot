@@ -1,15 +1,11 @@
-# Changelog 0.5.4
+# Changelog 0.6.0
 
-- Some commands need permission to be used
-- Rename `revokem` to `removem`
-- Shorten some commands' description
+## What's new?
 
-## Bug fixed:
+- Spotify link supported and streaming them with youtube.
+- Add response a response for `playm` to let know if the bot has received the request.
 
-- Permission won't override
+## Changed
 
-    Hierarchy:
-    - User -> Roles (Allowed) -> Roles (Denied)
-- `mplay` don't respond if user outside the voice channel
-- Fix queue skipper don't skip queue
-- Remove queue can also remove the current audio
+- FFMPEG can run locally as tools
+- add spotdl to `requirements.txt`

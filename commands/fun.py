@@ -9,6 +9,7 @@ from services.homura.permission import has_prefix_permission
 class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        mplayer.ydl_clear_cache()
 
     # Audio/Music command field
 

@@ -6,6 +6,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from services.homura.permission import has_permission
 from services.homura.permission import has_prefix_permission
+from services.homura.permission import has_permission
+from services.homura.permission import has_prefix_permission
 
 from pyauxy import hprint
 
@@ -76,6 +78,11 @@ class Utility(commands.Cog):
             f'**[Homura on Github](https://github.com/ReinKageno/homura-bot)**\n'
             f'**[Saweria to kanaede]({config.SAWERIA})**\n\n'
         )
+        text.append(
+            f'Participate in supporting development:\n'
+            f'**[Homura on Github](https://github.com/ReinKageno/homura-bot)**\n'
+            f'**[Saweria to kanaede]({config.SAWERIA})**\n\n'
+        )
         text.append(f'**Last changelog:**\n')
 
         try:
@@ -110,7 +117,16 @@ class Utility(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command()
+    @commands.is_owner()
+    async def clear_ydl(self, ctx:commands.Context):
+        await ctx.send('Clearing media player cache...', delete_after=10)
+        from services.homura.mplayer import ydl_clear_cache
+        ydl_clear_cache()
+        await ctx.message.delete()
+
     @commands.command(help='Tell me to join a Voice Channel.')
+    @has_prefix_permission()
     @has_prefix_permission()
     async def join(self, ctx:commands.Context):
         if ctx.author.voice:
@@ -123,6 +139,7 @@ class Utility(commands.Cog):
 
     @commands.command(help='Graceful way to disconnect from a Voice Channel')
     @has_prefix_permission()
+    @has_prefix_permission()
     async def leave(self, ctx:commands.Context):
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
@@ -131,6 +148,7 @@ class Utility(commands.Cog):
             await ctx.send("I am not connected to a voice channel.")
 
     @commands.command(help='Ping me to check.')
+    @has_prefix_permission()
     @has_prefix_permission()
     async def ping(self, ctx):
         guild_id = ctx.guild.id
@@ -141,6 +159,13 @@ class Utility(commands.Cog):
             f"**Channel:** {channel_id}\n"
             f"**Status:** Online\n"
             f"**Go Support:** {config.SAWERIA}"
+        )
+
+    @commands.command(helpt='Donate to help the developer.')
+    async def donate(self, ctx):
+        await ctx.send(
+            f"You can donate to the developer via:\n",
+            f"{config.SAWERIA}"            
         )
 
 async def setup(bot):
