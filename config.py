@@ -4,7 +4,7 @@ import shutil
 
 @dataclass(frozen=True)
 class Config:
-    VERSION = "0.6.1"
+    VERSION = "0.6.3"
     BOT_NAME = "Homura"
     CREATOR = "Kanade"
     PREFIX = "$"

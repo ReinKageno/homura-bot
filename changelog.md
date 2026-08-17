@@ -1,3 +1,5 @@
-# Changelog 0.6.1
+# Changelog 0.6.3
 
-- Permission setup mention users or roles silently
+## Bugs fixed
+
+- fixed audio won't play using youtube url

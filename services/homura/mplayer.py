@@ -134,11 +134,12 @@ async def music_player(ctx:commands.Context, search):
         if url_info:
             source = url_info['source']
             url = url_info['url']
-            spotify = url_info['spot']
 
             if source == 'youtube':
                 query = url
             elif source == 'spotify':
+                spotify = url_info['spot']
+                
                 hprint(f'[spotify] Searching for {search} audio', id=guild_id)
                 query_spotify = await find_youtube_audio(spotify)
 
