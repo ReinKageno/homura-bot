@@ -12,13 +12,17 @@ class Security(commands.Cog):
         self.bot = bot
 
     @app_commands.command(name='perms_set', description='Set up permission to current channel.')
+    @app_commands.choices(access=[
+        app_commands.Choice(name='Enable', value=1),
+        app_commands.Choice(name='Disable', value=0)
+    ])
     @is_permission_manager()
     async def perms_set(
         self,
         interaction:discord.Interaction,
         target:discord.Role|discord.Member,
         command:str,
-        access:bool
+        access:app_commands.Choice[int]
     ):
         db = database.permission_db[str(interaction.guild_id)]
 
@@ -26,19 +30,29 @@ class Security(commands.Cog):
         target_id = str(target.id)
         target_type = 'roles' if isinstance(target, discord.Role) else 'users'
 
+        # no_ping = discord.AllowedMentions(users=False,roles=False,everyone=False)
+
+        _access:bool = bool(access.value)
+
         db.update_one(
             {'channel_id': channel_id},
             {
                 "$set": {
-                    f"commands.{command}.{target_type}.{target_id}": access
+                    f"commands.{command}.{target_type}.{target_id}": _access
                 }
             },
             upsert=True,
         )
-        await interaction.response.send_message(
-            f'Permission {'enabled' if access else "disabled"} '
-            f'for `{command}` for {target.mention}.'
+
+        embed = discord.Embed(
+            title="Permission Manager",
+            description=(
+                f'Permission **{'enabled' if _access else "disabled"}** '
+                f'for `{command}` for <@{target.id}>.'
+            )
         )
+
+        await interaction.response.send_message(embed=embed, delete_after=30)
 
     @app_commands.command(name='perms_get', description='Show permission information')
     @is_permission_manager()
@@ -77,7 +91,7 @@ class Security(commands.Cog):
             user = interaction.guild.get_member(int(user_id))
 
             if user:
-                name = user.mention
+                name = f"<@{user.id}>!"
             else:
                 name = f'Unknown User ({user_id})'
 
@@ -93,7 +107,7 @@ class Security(commands.Cog):
             role = interaction.guild.get_role(int(role_id))
 
             if role:
-                name = role.mention
+                name = f"<@{role.id}>"
             else:
                 name = f'Unknown Role ({role_id})'
 
@@ -107,7 +121,11 @@ class Security(commands.Cog):
 
         perms = "\n".join(lines)
 
-        await interaction.response.send_message(perms)
+        embed = discord.Embed(
+            title="Permission Manager",
+            description=perms
+        )
+        await interaction.response.send_message(embed=embed)
 
 async def setup(bot):
     await bot.add_cog(Security(bot))
