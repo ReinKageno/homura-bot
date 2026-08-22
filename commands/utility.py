@@ -4,9 +4,6 @@ import discord
 from config import config
 from discord.ext import commands
 from dotenv import load_dotenv
-from services.homura.permission import has_permission
-from services.homura.permission import has_prefix_permission
-from services.homura.permission import has_permission
 from services.homura.permission import has_prefix_permission
 
 from pyauxy import hprint
@@ -78,11 +75,6 @@ class Utility(commands.Cog):
             f'**[Homura on Github](https://github.com/ReinKageno/homura-bot)**\n'
             f'**[Saweria to kanaede]({config.SAWERIA})**\n\n'
         )
-        text.append(
-            f'Participate in supporting development:\n'
-            f'**[Homura on Github](https://github.com/ReinKageno/homura-bot)**\n'
-            f'**[Saweria to kanaede]({config.SAWERIA})**\n\n'
-        )
         text.append(f'**Last changelog:**\n')
 
         try:
@@ -103,10 +95,11 @@ class Utility(commands.Cog):
             with open('news.md', 'r', encoding='utf-8') as f:
                 news = f.read()
 
-            embed.add_field(
-                name='News',
-                value=news
-            )
+            if len(news) > 1:
+                embed.add_field(
+                    name='News',
+                    value=news
+                )
         except Exception:
             hprint('File: news.md not found')
 
@@ -121,12 +114,11 @@ class Utility(commands.Cog):
     @commands.is_owner()
     async def clear_ydl(self, ctx:commands.Context):
         await ctx.send('Clearing media player cache...', delete_after=10)
-        from services.homura.mplayer import ydl_clear_cache
+        from services.homura.MediaLoader import ydl_clear_cache
         ydl_clear_cache()
         await ctx.message.delete()
 
     @commands.command(help='Tell me to join a Voice Channel.')
-    @has_prefix_permission()
     @has_prefix_permission()
     async def join(self, ctx:commands.Context):
         if ctx.author.voice:
@@ -139,7 +131,6 @@ class Utility(commands.Cog):
 
     @commands.command(help='Graceful way to disconnect from a Voice Channel')
     @has_prefix_permission()
-    @has_prefix_permission()
     async def leave(self, ctx:commands.Context):
         if ctx.voice_client:
             await ctx.voice_client.disconnect()
@@ -148,7 +139,6 @@ class Utility(commands.Cog):
             await ctx.send("I am not connected to a voice channel.")
 
     @commands.command(help='Ping me to check.')
-    @has_prefix_permission()
     @has_prefix_permission()
     async def ping(self, ctx):
         guild_id = ctx.guild.id

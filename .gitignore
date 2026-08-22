@@ -1,6 +1,7 @@
 venv/
 __pycache__
 *.p[cod]
+requirements.in
 
 .env
 .vscode/

@@ -13,5 +13,5 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 
 hprint('Successfully connected to server database.')
 
-musicQueue_db = client['guildMusic']
+audioQueue_db = client['guildAudio']
 permission_db = client['guildPerms']

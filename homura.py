@@ -31,7 +31,7 @@ else:
 handler = logging.handlers.RotatingFileHandler(
      filename='discord.log',
      encoding='utf-8',
-     maxBytes=32 * 1024 * 1024,
+     maxBytes=10 * 1024 * 1024,
      backupCount=5,
 )
 
@@ -68,10 +68,17 @@ class Homura(commands.Bot):
         print(f'Logged in as {self.user}')
 
     async def on_message(self, message):
-        if message.author.bot:
+        if message.author.bot or message.author == bot.user:
             return
         
         await self.process_commands(message)
+
+    async def on_error(event, *args, **kwargs):
+        if event == 'on_message':
+            print(f"An error occurred in on_message. Message details: {args[0]}")
+        else:
+            raise
+
 
 bot = Homura()
 
