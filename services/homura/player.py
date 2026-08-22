@@ -31,7 +31,7 @@ async def audio_player(ctx:commands.Context, search):
 
         # Check if user on a voice channel
         if not ctx.author.voice:
-            await ctx.send(f'Please use when you inside a voice channel.')
+            await ctx.send(f"Please use when you inside a voice channel.")
             return
 
         voice_channel = ctx.author.voice.channel
@@ -49,16 +49,16 @@ async def audio_player(ctx:commands.Context, search):
         if audio_db.estimated_document_count():
             empty_queue = False
 
-        wait_msg = await ctx.send('Checking the request...')
+        wait_msg = await ctx.send("Checking the request...")
 
         # Gatekeeper
         media = await media_loader(search)
 
         if media == 4041:
-            await wait_msg.edit("Couldn't find a playable version of that Spotify track.")
+            await wait_msg.edit(content="Couldn't find a playable version of that Spotify track.")
             return
         if media == 4042:
-            await wait_msg.edit('No results found.')
+            await wait_msg.edit(content="No results found.")
             return
 
         audio_db.insert_one({
@@ -75,7 +75,8 @@ async def audio_player(ctx:commands.Context, search):
             await wait_msg.delete()
             await play_next(ctx)
         if not empty_queue:
-            await wait_msg.edit(f'Queue: {media["title"]} by {media["channel"]} successfully added.')
+            msg = f"Queue: {media['title']} by {media['channel']} successfully added."
+            await wait_msg.edit(content=msg)
 
 async def play_next(ctx:commands.Context, err=None):
 
