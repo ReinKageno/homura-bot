@@ -129,13 +129,15 @@ async def play_next(ctx:commands.Context, err=None):
         )
 
         def after(error):
+            get_err = 0
             if error:
                 print(error)
+                get_err = 1
 
             audio_db.delete_one({"_id": audio["_id"]})
 
             asyncio.run_coroutine_threadsafe(
-                play_next(ctx, err=1),
+                play_next(ctx, get_err),
                 loop
             )
 

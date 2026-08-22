@@ -2,4 +2,4 @@
 
 ## Bugs Fixed
 
-- fixed audio_player: edit message takes 2 parameters
+- fixed play_next: always throw error after finish a song and stop the whole queue
