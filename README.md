@@ -1,6 +1,16 @@
 <div align="center">
 
-<p style="font-size:40px; margin:0">Homura</p>
-<p>Piwulang Becik Teens Club Discord Bot</p>
+<h1>Homura</h1>
+<p>A customizable multipurpose discord bot for Piwulang Becik Teens Club</p>
 
 </div>
+
+### External Software
+
+- FFmpeg
+https://ffmpeg.org/
+Used for audio/video processing.
+
+- Deno
+https://deno.com/
+Used as a JavaScript runtime for yt-dlp.
